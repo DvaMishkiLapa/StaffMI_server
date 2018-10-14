@@ -107,7 +107,7 @@ class DBManager():
     def get_all_projects(self):
         # TODO: Access rights!
         projects = self.projects.find({}, {'_id': False})
-        return 200, (projects,)
+        return 200, tuple(projects)
 
 
     def get_projects_by_names(self, names):
