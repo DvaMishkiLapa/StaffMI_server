@@ -1,0 +1,11 @@
+version: "3"
+services:
+  pms:
+    build: .
+    restart: always
+    volumes:
+      - ./site:/site
+
+  db:
+    image: mongo
+    restart: always
