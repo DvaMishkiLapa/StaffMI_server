@@ -63,7 +63,7 @@ class DBManager():
         pwd_hash = sha256(userdata['pwd'].encode()).hexdigest()
         userdata['pwd'] = pwd_hash
         self.users.update({'email': userdata['email']}, userdata)
-        return 200
+        return 200, 'OK'
 
 
     def authorization(self, email, pwd):
@@ -87,7 +87,7 @@ class DBManager():
         if self.projects.find_one({'name': projectdata['name']}):
             return 400, 'Project already exist!'
         self.projects.insert_one(projectdata)
-        return 200
+        return 200, 'OK'
 
 
     def del_project(self, name):
@@ -101,7 +101,7 @@ class DBManager():
         if not project:
             return 404, 'Project not found!'
         self.projects.update({'name': projectdata['name']}, projectdata)
-        return 200
+        return 200, 'OK'
 
 
     def get_all_projects(self):
