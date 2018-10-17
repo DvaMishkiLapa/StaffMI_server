@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+import os
 from hashlib import sha256
 
 import jwt
 import pymongo
 
 
-class DBManager():
+class DBManager:
     def __init__(self):
         try:
             self.client = pymongo.MongoClient(host='db')
@@ -18,9 +19,15 @@ class DBManager():
         # Collections
         self.users = self.db.users
         self.projects = self.db.projects
-        self.tokens = self.db.tokens
 
-        self.secret = '12345'
+        self.secret = os.getenv('DB_SECRET')
+
+        self.add_users([{
+            'email': os.getenv('ADMIN_EMAIL'),
+            'pwd': os.getenv('ADMIN_PWD'),
+            'name': ['Иванов', 'Иван', 'Иванович'],
+            'position': 'Генеральный директор'
+        }])
 
 
     # Authentication
@@ -28,87 +35,107 @@ class DBManager():
     def create_token(self, email):
         exp = datetime.datetime.utcnow() + datetime.timedelta(minutes=10)
         token = jwt.encode({'email': email, 'exp': exp}, self.secret, algorithm='HS256')
-        return {'token': token.decode()}
+        return token.decode()
 
 
     def check_token(self, token):
         try:
             payload = jwt.decode(token.encode(), self.secret, algorithms=['HS256'])
-        except (jwt.ExpiredSignatureError, jwt.DecodeError):
-            return 403, 'Invalid token!'
-        return 200, payload['email']
+        except jwt.ExpiredSignatureError:
+            return False, 'Token expired!', 403
+        except (jwt.DecodeError, AttributeError):
+            return False, 'Invalid token!', 403
+        return True, payload['email'], 200
 
 
     # Users
 
-    def add_user(self, userdata):
-        if self.users.find_one({'email': userdata['email']}):
-            return 400, 'User already exist!'
-        pwd_hash = sha256(userdata['pwd'].encode()).hexdigest()
-        userdata['pwd'] = pwd_hash
-        self.users.insert_one(userdata)
-        return 200, 'OK'
+    def add_users(self, users_data):
+        result = []
+        for user in users_data:
+            if self.users.find_one({'email': user['email']}):
+                result.append((False, 'User already exist!', 400))
+            else:
+                pwd_hash = sha256(user['pwd'].encode()).hexdigest()
+                user['pwd'] = pwd_hash
+                self.users.insert_one(user)
+                result.append((True, 'User has been added.', 200))
+        return result
 
 
-    def del_user(self, email):
-        if self.users.delete_one({'email': email}).deleted_count:
-            return 200, 'OK'
-        return 404, 'User not found!'
+    def del_users(self, users_list):
+        result = []
+        for user in users_list:
+            if self.users.delete_one({'email': user['email']}).deleted_count:
+                result.append((True, 'User has been removed.', 200))
+            else:
+                result.append((False, 'User not found!', 404))
+        return result
 
 
-    def edit_user(self, userdata):
-        user = self.users.find_one({'email': userdata['email']})
-        if not user:
-            return 404, 'User not found!'
-        pwd_hash = sha256(userdata['pwd'].encode()).hexdigest()
-        userdata['pwd'] = pwd_hash
-        self.users.update({'email': userdata['email']}, userdata)
-        return 200, 'OK'
+    def edit_users(self, users_data):
+        result = []
+        for user in users_data:
+            if not self.users.find_one({'email': user['email']}):
+                result.append([False, 'User not found!', 404])
+            else:
+                pwd_hash = sha256(user['pwd'].encode()).hexdigest()
+                user['pwd'] = pwd_hash
+                self.users.replace_one({'email': user['email']}, user)
+                result.append((True, 'User has been changed.', 200))
+        return result
 
 
-    def authorization(self, email, pwd):
+    def authorization(self, user_data):
+        email = user_data['email']
+        pwd = user_data['pwd']
         user = self.users.find_one({'email': email})
         if not user:
-            return 404, 'User not found!'
+            return False, 'User not found!', 404
         if user['pwd'] == sha256(pwd.encode()).hexdigest():
-            return 200, self.create_token(email)
-        return 400, 'Wrong password!'
+            return True, self.create_token(email), 200
+        return False, 'Wrong password!', 400
 
 
-    def get_all_users(self):
-        # TODO: Access rights!
+    def get_all_users(self, _={}):
         users = self.users.find({}, {'_id': False, 'pwd': False})
-        return 200, tuple(users)
+        return True, tuple(users), 200
 
 
     # Projets
 
-    def add_project(self, projectdata):
-        if self.projects.find_one({'name': projectdata['name']}):
-            return 400, 'Project already exist!'
-        self.projects.insert_one(projectdata)
-        return 200, 'OK'
+    def add_projects(self, projects_data):
+        result = []
+        for project in projects_data:
+            if self.projects.find_one({'name': project['name']}):
+                result.append([False, 'Project already exist!', 400])
+            else:
+                self.projects.insert_one(project)
+                result.append((True, 'Project has been added.', 200))
+        return result
 
 
-    def del_project(self, name):
-        if self.projects.delete_one({'name': name}).deleted_count:
-            return 200
-        return 404, 'Project not found!'
+    def del_projects(self, projects_list):
+        result = []
+        for project in projects_list:
+            if self.projects.delete_one({'name': project['name']}).deleted_count:
+                result.append((True, 'Project has been removed.', 200))
+            else:
+                result.append((False, 'Project not found!', 404))
+        return result
 
 
-    def edit_project(self, projectdata):
-        project = self.projects.find_one({'name': projectdata['name']})
-        if not project:
-            return 404, 'Project not found!'
-        self.projects.update({'name': projectdata['name']}, projectdata)
-        return 200, 'OK'
+    def edit_projects(self, projects_data):
+        result = []
+        for project in projects_data:
+            if not self.projects.find_one({'name': project['name']}):
+                result.append([False, 'Project not found!', 404])
+            else:
+                self.projects.replace_one({'name': project['name']}, project)
+                result.append((True, 'Project has been changed.', 200))
+        return result
 
 
-    def get_all_projects(self):
-        # TODO: Access rights!
+    def get_all_projects(self, _={}):
         projects = self.projects.find({}, {'_id': False})
-        return 200, tuple(projects)
-
-
-    def get_projects_by_names(self, names):
-        return 200, list(self.projects.find({'name': name}) for name in names)
+        return True, tuple(projects), 200

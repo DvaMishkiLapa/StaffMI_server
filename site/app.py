@@ -4,168 +4,76 @@ import functools
 import json
 
 from flask import Flask, Response, request
+from jsonschema import FormatChecker, ValidationError, validate
 
 import db
 
 app = Flask(__name__)
 app.secret_key = b'Xc-Z3NG@kw*PWAkN5m3!Km6evYnjTEy]sctMQ=eDsUv139.Ghd4*=6~=WYTVQUN.'
+app.config['MAX_CONTENT_LENGTH'] = 8 * 1024 * 1024
 
 dbm = db.DBManager()
+
+with open('schema.json', 'r') as f:
+    json_schema = json.load(f)
+
+
+def response_formatter(response):
+    if isinstance(response, tuple): # TODO: Refactor this
+        ok, content, code = response
+        return {'ok': ok, 'content': content} if ok else {'ok': ok, 'content': content, 'error_code': code}
+    result = []
+    for r in response:
+        ok, content, code = r
+        result.append({'ok': ok, 'content': content} if ok else {'ok': ok, 'content': content, 'error_code': code})
+    return result
 
 
 def response(func):
     @functools.wraps(func)
-    def response_wrapper(*args, **kwds):
-        code, data = func(*args, **kwds)
-        if code == 200:
-            json_text = json.dumps({'response': data})
-        else:
-            json_text = json.dumps({'error': {
-                'error_code': code,
-                'error_msg': data
-            }})
-        return Response(status=code, mimetype='application/json', response=json_text)
+    def response_wrapper(*args, **kwargs):
+        response = func(*args, **kwargs)
+        response_text = response_formatter(response)
+        status = response_text.get('error_code', 0) or 200
+        return Response(status=status, mimetype='application/json', response=json.dumps(response_text))
     return response_wrapper
 
 
-def check_token(token):
-    if not token:
-        return (403, 'Permission denied!')
-    code, text = dbm.check_token(token)
-    return (code, text)
+def requests_handler(requests):
+    result = [response_formatter(getattr(dbm, key)(requests[key])) for key in requests]
+    return dict(zip(requests, result))
 
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 @response
-def main():
-    return 200, {}
+def main_get():
+    return False, 'Only POST requests are allowed!', 400
 
 
-# Users
-
-
-@app.route('/auth')
+@app.route('/', methods=['POST'])
 @response
-def auth():
-    args = request.args
+def main_post():
     try:
-        result = dbm.authorization(args['email'], args['pwd'])
-    except KeyError:
-        return 400, 'Invalid request!'
-    return result
+        r = json.loads(request.data.decode())
+    except json.decoder.JSONDecodeError:
+        return False, 'Invalid JSON!', 400
 
-
-@app.route('/add_user')
-@response
-def add_users():
-    check = check_token(request.args.get('token'))
-    if 403 in check:
-        return check
-    # Params
-    args = request.args
     try:
-        name = args['surname'], args['name'], args['patronymic']
-        user_data = {'email': args['email'], 'pwd': args['pwd'], 'name': name, 'position': args['position']}
-    except KeyError:
-        return 400, 'Invalid request!'
-    return dbm.add_user(user_data)
+        validate(r, json_schema, format_checker=FormatChecker())
+    except ValidationError as e:
+        return False, e.message, 400
 
-
-@app.route('/del_user')
-@response
-def del_users():
-    check = check_token(request.args.get('token'))
-    if 403 in check:
-        return check
-    # Params
-    email = request.args.get('email')
-    return dbm.del_user(email)
-
-
-@app.route('/edit_user')
-@response
-def edit_users():
-    token = request.args.get('token')
-    check = check_token(token)
-    if 403 in check:
-        return check
-    # Params
-    get = request.args.get
-    email = get('email')
-    pwd = get('pwd')
-    name = [get('surname'), get('name'), get('patronymic')]
-    position = get('position')
-    if None in (email, pwd, *name, position):
-        return 400, 'Invalid request!'
-    userdata = {'email': email, 'pwd': pwd, 'name': name, 'position': position}
-    return dbm.edit_user(userdata)
-
-
-@app.route('/get_all_users')
-@response
-def get_all_users():
-    token = request.args.get('token')
-    check = check_token(token)
-    if 403 in check:
-        return check
-    return dbm.get_all_users()
-
-
-# Projects
-
-
-@app.route('/add_project')
-@response
-def add_project():
-    check = check_token(request.args.get('token'))
-    if 403 in check:
-        return check
-    # Params
-    args = request.args
+    # TODO: Refactor this
     try:
-        project_data = {'name': args['name'], 'deadline': args['deadline']}
+        return True, requests_handler({'authorization': r['requests']['authorization']}), 200
     except KeyError:
-        return 400, 'Invalid request!'
-    return dbm.add_project(project_data)
+        pass
 
+    ok, text, code = dbm.check_token(r['token'])
+    if not ok:
+        return ok, text, code
 
-@app.route('/del_project')
-@response
-def del_project():
-    check = check_token(request.args.get('token'))
-    if 403 in check:
-        return check
-    # Params
-    args = request.args
-    try:
-        name = args['name']
-    except KeyError:
-        return 400, 'Invalid request!'
-    return dbm.del_project(name)
-
-
-@app.route('/edit_project')
-@response
-def edit_project():
-    check = check_token(request.args.get('token'))
-    if 403 in check:
-        return check
-    # Params
-    args = request.args
-    try:
-        project_data = {'name': args['name'], 'deadline': args['deadline']}
-    except KeyError:
-        return 400, 'Invalid request!'
-    return dbm.edit_project(project_data)
-
-
-@app.route('/get_all_projects')
-@response
-def get_all_projects():
-    check = check_token(request.args.get('token'))
-    if 403 in check:
-        return check
-    return dbm.get_all_projects()
+    return True, requests_handler(r['requests']), 200
 
 
 if __name__ == "__main__":

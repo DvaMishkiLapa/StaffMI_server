@@ -1,0 +1,142 @@
+{
+    "definitions": {
+        "authorization": {
+            "type": "object",
+            "properties": {
+                "email": {"type": "string", "format": "email"},
+                "pwd": {"type": "string"}
+            },
+            "additionalProperties": false,
+            "minProperties": 2
+        },
+        "add_users": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "email": {"type": "string", "minLength": 1, "maxLength": 32, "format": "email"},
+                    "pwd": {"type": "string", "minLength": 1, "maxLength": 32},
+                    "name": {"type": "array", "items": {"type": "string", "minLength": 1, "maxLength": 32}, "maxItems": 3, "minItems": 3},
+                    "position": {"type": "string", "minLength": 1, "maxLength": 32}
+                },
+                "additionalProperties": false,
+                "minProperties": 4
+            }
+        },
+        "del_users": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "email": {"type": "string", "minLength": 1, "maxLength": 32, "format": "email"}
+                },
+                "additionalProperties": false,
+                "minProperties": 1
+            }
+        },
+        "edit_users": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "email": {"type": "string", "minLength": 1, "maxLength": 32, "format": "email"},
+                    "pwd": {"type": "string", "minLength": 1, "maxLength": 32},
+                    "name": {"type": "array", "items": {"type": "string", "minLength": 1, "maxLength": 32}, "maxItems": 3, "minItems": 3},
+                    "position": {"type": "string", "minLength": 1, "maxLength": 32}
+                },
+                "additionalProperties": false,
+                "minProperties": 4
+            }
+        },
+        "get_all_users": {
+            "type": "object",
+            "additionalProperties": false
+        },
+        "add_projects": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string", "minLength": 1, "maxLength": 32},
+                    "deadline": {"type": "string", "maxLength": 32, "format": "date-time"}
+                },
+                "additionalProperties": false,
+                "minProperties": 2
+            }
+        },
+        "del_projects": {
+            "type": "array",
+            "items": {"type": "string", "maxLength": 32}
+        },
+        "edit_projects": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string", "minLength": 1, "maxLength": 32},
+                    "deadline": {"type": "string", "maxLength": 32, "format": "date-time"}
+                },
+                "additionalProperties": false,
+                "minProperties": 2
+            }
+        },
+        "get_all_projects": {
+            "type": "object",
+            "additionalProperties": false
+        },
+        "get_projects_by_email": {
+            "type": "array",
+            "items": {"type": "string", "maxLength": 32, "format": "email"}
+        },
+        "assign_to_projects": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "email": {"type": "string", "maxLength": 32, "format": "email"},
+                    "project": {"type": "string", "maxLength": 32}
+                },
+                "additionalProperties": false,
+                "minProperties": 2
+            }
+        },
+        "remove_from_projects": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "email": {"type": "string", "maxLength": 32, "format": "email"},
+                    "project": {"type": "string", "maxLength": 32}
+                },
+                "additionalProperties": false,
+                "minProperties": 2
+            }
+        }
+    },
+
+    "type": "object",
+    "properties": {
+        "requests": {
+            "type": "object",
+            "properties": {
+                "authorization": {"$ref": "#/definitions/authorization"},
+                "add_users": {"$ref": "#/definitions/add_users"},
+                "del_users": {"$ref": "#/definitions/del_users"},
+                "edit_users": {"$ref": "#/definitions/edit_users"},
+                "get_all_users": {"$ref": "#/definitions/get_all_users"},
+                "add_projects": {"$ref": "#/definitions/add_projects"},
+                "del_projects": {"$ref": "#/definitions/del_projects"},
+                "edit_projects": {"$ref": "#/definitions/projects"},
+                "get_all_projects": {"$ref": "#/definitions/get_all_projects"},
+                "get_projects_by_email": {"$ref": "#/definitions/get_projects_by_email"},
+                "assign_to_projects": {"$ref": "#/definitions/assign_to_projects"},
+                "remove_from_projects": {"$ref": "#/definitions/remove_from_projects"}
+            },
+            "additionalProperties": false,
+            "minProperties": 1
+        },
+        "token": {"type": "string"}
+    },
+    "additionalProperties": false,
+    "minProperties": 2
+}

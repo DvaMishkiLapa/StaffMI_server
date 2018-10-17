@@ -5,6 +5,10 @@ services:
     restart: always
     volumes:
       - ./site:/site
+    environment:
+      - ADMIN_EMAIL=admin@admin.ru
+      - ADMIN_PWD=12345
+      - DB_SECRET=MOSTSECUREKEY
 
   db:
     image: mongo
