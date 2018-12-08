@@ -10,7 +10,7 @@ import db
 
 app = Flask(__name__)
 app.secret_key = b'Xc-Z3NG@kw*PWAkN5m3!Km6evYnjTEy]sctMQ=eDsUv139.Ghd4*=6~=WYTVQUN.'
-app.config['MAX_CONTENT_LENGTH'] = 8 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024
 
 dbm = db.DBManager()
 
