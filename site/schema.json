@@ -25,14 +25,7 @@
         },
         "del_users": {
             "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "email": {"type": "string", "minLength": 1, "maxLength": 32, "format": "email"}
-                },
-                "additionalProperties": false,
-                "minProperties": 1
-            }
+            "items": {"type": "string", "maxLength": 32}
         },
         "edit_users": {
             "type": "array",

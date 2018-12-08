@@ -20,11 +20,11 @@ class DBManager:
         self.users = self.db.users
         self.projects = self.db.projects
 
-        self.secret = os.getenv('DB_SECRET')
+        self.secret = os.getenv('DB_SECRET', 'MOSTSECUREKEY')
 
         self.add_users([{
-            'email': os.getenv('ADMIN_EMAIL'),
-            'pwd': os.getenv('ADMIN_PWD'),
+            'email': os.getenv('ADMIN_EMAIL', 'admin@admin.ru'),
+            'pwd': os.getenv('ADMIN_PWD', '12345'),
             'name': ['Иванов', 'Иван', 'Иванович'],
             'position': 'Генеральный директор'
         }])
@@ -65,8 +65,8 @@ class DBManager:
 
     def del_users(self, users_list):
         result = []
-        for user in users_list:
-            if self.users.delete_one({'email': user['email']}).deleted_count:
+        for _id in users_list:
+            if self.users.delete_one({'_id': _id}).deleted_count:
                 result.append((True, 'User has been removed.', 200))
             else:
                 result.append((False, 'User not found!', 404))
@@ -76,12 +76,12 @@ class DBManager:
     def edit_users(self, users_data):
         result = []
         for user in users_data:
-            if not self.users.find_one({'email': user['email']}):
+            if not self.users.find_one({'_id': user['_id']}):
                 result.append([False, 'User not found!', 404])
             else:
                 pwd_hash = sha256(user['pwd'].encode()).hexdigest()
                 user['pwd'] = pwd_hash
-                self.users.replace_one({'email': user['email']}, user)
+                self.users.replace_one({'_id': user['_id']}, user)
                 result.append((True, 'User has been changed.', 200))
         return result
 
@@ -98,7 +98,10 @@ class DBManager:
 
 
     def get_all_users(self, _={}):
-        users = self.users.find({}, {'_id': False, 'pwd': False})
+        users = self.users.find({}, {'pwd': False})
+        users = list(users)
+        for u in users:
+            u['_id'] = str(u['_id'])
         return True, tuple(users), 200
 
 
@@ -117,8 +120,8 @@ class DBManager:
 
     def del_projects(self, projects_list):
         result = []
-        for project in projects_list:
-            if self.projects.delete_one({'name': project}).deleted_count:
+        for _id in projects_list:
+            if self.projects.delete_one({'_id': _id}).deleted_count:
                 result.append((True, 'Project has been removed.', 200))
             else:
                 result.append((False, 'Project not found!', 404))
@@ -128,14 +131,17 @@ class DBManager:
     def edit_projects(self, projects_data):
         result = []
         for project in projects_data:
-            if not self.projects.find_one({'name': project['name']}):
+            if not self.projects.find_one({'_id': project['_id']}):
                 result.append([False, 'Project not found!', 404])
             else:
-                self.projects.replace_one({'name': project['name']}, project)
+                self.projects.replace_one({'_id': project['_id']}, project)
                 result.append((True, 'Project has been changed.', 200))
         return result
 
 
     def get_all_projects(self, _={}):
-        projects = self.projects.find({}, {'_id': False})
+        projects = self.projects.find({})
+        projects = list(projects)
+        for p in projects:
+            p['_id'] = str(p['_id'])
         return True, tuple(projects), 200
