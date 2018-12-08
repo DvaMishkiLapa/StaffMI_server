@@ -2,6 +2,7 @@
 
 import datetime
 import os
+from bson import ObjectId
 from hashlib import sha256
 
 import jwt
@@ -66,7 +67,7 @@ class DBManager:
     def del_users(self, users_list):
         result = []
         for _id in users_list:
-            if self.users.delete_one({'_id': _id}).deleted_count:
+            if self.users.delete_one({'_id': ObjectId(_id)}).deleted_count:
                 result.append((True, 'User has been removed.', 200))
             else:
                 result.append((False, 'User not found!', 404))
@@ -76,12 +77,12 @@ class DBManager:
     def edit_users(self, users_data):
         result = []
         for user in users_data:
-            if not self.users.find_one({'_id': user['_id']}):
+            if not self.users.find_one({'_id': ObjectId(user['_id'])}):
                 result.append([False, 'User not found!', 404])
             else:
                 pwd_hash = sha256(user['pwd'].encode()).hexdigest()
                 user['pwd'] = pwd_hash
-                self.users.replace_one({'_id': user['_id']}, user)
+                self.users.replace_one({'_id': ObjectId(user['_id'])}, user)
                 result.append((True, 'User has been changed.', 200))
         return result
 
@@ -117,7 +118,7 @@ class DBManager:
         if user['pwd'] == sha256(old_pwd.encode()).hexdigest():
             pwd_hash = sha256(new_pwd.encode()).hexdigest()
             user['pwd'] = pwd_hash
-            self.users.replace_one({'_id': user['_id']}, user)
+            self.users.replace_one({'_id': ObjectId(user['_id'])}, user)
             return True, 'Password has been changed.', 200
         return False, 'Wrong password!', 400
 
@@ -138,7 +139,7 @@ class DBManager:
     def del_projects(self, projects_list):
         result = []
         for _id in projects_list:
-            if self.projects.delete_one({'_id': _id}).deleted_count:
+            if self.projects.delete_one({'_id': ObjectId(_id)}).deleted_count:
                 result.append((True, 'Project has been removed.', 200))
             else:
                 result.append((False, 'Project not found!', 404))
@@ -148,10 +149,10 @@ class DBManager:
     def edit_projects(self, projects_data):
         result = []
         for project in projects_data:
-            if not self.projects.find_one({'_id': project['_id']}):
+            if not self.projects.find_one({'_id': ObjectId(project['_id'])}):
                 result.append([False, 'Project not found!', 404])
             else:
-                self.projects.replace_one({'_id': project['_id']}, project)
+                self.projects.replace_one({'_id': ObjectId(project['_id'])}, project)
                 result.append((True, 'Project has been changed.', 200))
         return result
 
