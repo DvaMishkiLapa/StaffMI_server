@@ -118,7 +118,7 @@ class DBManager:
     def del_projects(self, projects_list):
         result = []
         for project in projects_list:
-            if self.projects.delete_one({'name': project['name']}).deleted_count:
+            if self.projects.delete_one({'name': project}).deleted_count:
                 result.append((True, 'Project has been removed.', 200))
             else:
                 result.append((False, 'Project not found!', 404))
