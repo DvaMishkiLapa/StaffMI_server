@@ -41,6 +41,16 @@
                 "minProperties": 4
             }
         },
+        "change_password": {
+            "type": "object",
+            "properties": {
+                "email": {"type": "string", "minLength": 1, "maxLength": 32, "format": "email"},
+                "old_pwd": {"type": "string", "minLength": 1, "maxLength": 32},
+                "new_pwd": {"type": "string", "minLength": 1, "maxLength": 32}
+            },
+            "additionalProperties": false,
+            "minProperties": 3
+        },
         "get_all_users": {
             "type": "object",
             "additionalProperties": false
@@ -116,6 +126,7 @@
                 "add_users": {"$ref": "#/definitions/add_users"},
                 "del_users": {"$ref": "#/definitions/del_users"},
                 "edit_users": {"$ref": "#/definitions/edit_users"},
+                "change_password": {"$ref": "#/definitions/change_password"},
                 "get_all_users": {"$ref": "#/definitions/get_all_users"},
                 "add_projects": {"$ref": "#/definitions/add_projects"},
                 "del_projects": {"$ref": "#/definitions/del_projects"},

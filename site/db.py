@@ -105,6 +105,21 @@ class DBManager:
         return True, tuple(users), 200
 
 
+    def change_password(self, user_data):
+        email = user_data['email']
+        old_pwd = user_data['old_pwd']
+        new_pwd = user_data['new_pwd']
+        user = self.users.find_one({'email': email})
+        if not user:
+            return False, 'User not found!', 404
+        if user['pwd'] == sha256(old_pwd.encode()).hexdigest():
+            pwd_hash = sha256(new_pwd.encode()).hexdigest()
+            user['pwd'] = pwd_hash
+            self.users.replace_one({'_id': user['_id']}, user)
+            return True, 'Password has been changed.', 200
+        return False, 'Wrong password!', 400
+
+
     # Projets
 
     def add_projects(self, projects_data):
