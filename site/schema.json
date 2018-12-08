@@ -53,7 +53,12 @@
         },
         "get_all_users": {
             "type": "object",
-            "additionalProperties": false
+            "properties": {
+                "offset": {"type": "integer"},
+                "length": {"type": "integer"}
+            },
+            "additionalProperties": false,
+            "minProperties": 2
         },
         "add_projects": {
             "type": "array",
@@ -85,7 +90,12 @@
         },
         "get_all_projects": {
             "type": "object",
-            "additionalProperties": false
+            "properties": {
+                "offset": {"type": "integer"},
+                "length": {"type": "integer"}
+            },
+            "additionalProperties": false,
+            "minProperties": 2
         },
         "get_projects_by_email": {
             "type": "array",

@@ -97,9 +97,11 @@ class DBManager:
         return False, 'Wrong password!', 400
 
 
-    def get_all_users(self, _={}):
+    def get_all_users(self, params):
+        offset = params['offset']
+        length = params['length']
         users = self.users.find({}, {'pwd': False})
-        users = list(users)
+        users = list(users)[offset:offset + length]
         for u in users:
             u['_id'] = str(u['_id'])
         return True, tuple(users), 200
@@ -154,9 +156,11 @@ class DBManager:
         return result
 
 
-    def get_all_projects(self, _={}):
+    def get_all_projects(self, params):
+        offset = params['offset']
+        length = params['length']
         projects = self.projects.find({})
-        projects = list(projects)
+        projects = list(projects)[offset:offset + length]
         for p in projects:
             p['_id'] = str(p['_id'])
         return True, tuple(projects), 200
