@@ -126,7 +126,7 @@
                 "get_all_users": {"$ref": "#/definitions/get_all_users"},
                 "add_projects": {"$ref": "#/definitions/add_projects"},
                 "del_projects": {"$ref": "#/definitions/del_projects"},
-                "edit_projects": {"$ref": "#/definitions/projects"},
+                "edit_projects": {"$ref": "#/definitions/edit_projects"},
                 "get_all_projects": {"$ref": "#/definitions/get_all_projects"},
                 "get_projects_by_email": {"$ref": "#/definitions/get_projects_by_email"},
                 "assign_to_projects": {"$ref": "#/definitions/assign_to_projects"},
