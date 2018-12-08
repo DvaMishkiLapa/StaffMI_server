@@ -82,7 +82,8 @@ class DBManager:
             else:
                 pwd_hash = sha256(user['pwd'].encode()).hexdigest()
                 user['pwd'] = pwd_hash
-                self.users.replace_one({'_id': ObjectId(user['_id'])}, user)
+                _id = user.pop('_id')
+                self.users.replace_one({'_id': ObjectId(_id)}, user)
                 result.append((True, 'User has been changed.', 200))
         return result
 
@@ -152,7 +153,8 @@ class DBManager:
             if not self.projects.find_one({'_id': ObjectId(project['_id'])}):
                 result.append([False, 'Project not found!', 404])
             else:
-                self.projects.replace_one({'_id': ObjectId(project['_id'])}, project)
+                _id = user.pop('_id')
+                self.projects.replace_one({'_id': ObjectId(_id)}, project)
                 result.append((True, 'Project has been changed.', 200))
         return result
 
