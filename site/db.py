@@ -124,6 +124,10 @@ class DBManager:
         return False, 'Wrong password!', 400
 
 
+    def get_users_count(self, _=0):
+        return True, len(list(self.users.find({}))) , 200
+
+
     # Projets
 
     def add_projects(self, projects_data):
@@ -167,3 +171,7 @@ class DBManager:
         for p in projects:
             p['_id'] = str(p['_id'])
         return True, tuple(projects), 200
+
+
+    def get_projects_count(self, _=0):
+        return True, len(list(self.projects.find({}))) , 200

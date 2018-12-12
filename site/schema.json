@@ -60,6 +60,10 @@
             "additionalProperties": false,
             "minProperties": 2
         },
+        "get_users_count": {
+            "type": "object",
+            "additionalProperties": false
+        },
         "add_projects": {
             "type": "array",
             "items": {
@@ -97,6 +101,10 @@
             },
             "additionalProperties": false,
             "minProperties": 2
+        },
+        "get_projects_count": {
+            "type": "object",
+            "additionalProperties": false
         },
         "get_projects_by_email": {
             "type": "array",
@@ -139,10 +147,12 @@
                 "edit_users": {"$ref": "#/definitions/edit_users"},
                 "change_password": {"$ref": "#/definitions/change_password"},
                 "get_all_users": {"$ref": "#/definitions/get_all_users"},
+                "get_users_count": {"$ref": "#/definitions/get_users_count"},
                 "add_projects": {"$ref": "#/definitions/add_projects"},
                 "del_projects": {"$ref": "#/definitions/del_projects"},
                 "edit_projects": {"$ref": "#/definitions/edit_projects"},
                 "get_all_projects": {"$ref": "#/definitions/get_all_projects"},
+                "get_projects_count": {"$ref": "#/definitions/get_projects_count"},
                 "get_projects_by_email": {"$ref": "#/definitions/get_projects_by_email"},
                 "assign_to_projects": {"$ref": "#/definitions/assign_to_projects"},
                 "remove_from_projects": {"$ref": "#/definitions/remove_from_projects"}
