@@ -90,7 +90,7 @@
                     "deadline": {"type": "string", "maxLength": 32, "format": "date-time"}
                 },
                 "additionalProperties": false,
-                "minProperties": 2
+                "minProperties": 3
             }
         },
         "get_all_projects": {
