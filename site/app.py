@@ -63,9 +63,13 @@ def main_post():
     except ValidationError as e:
         return False, e.message, 400
 
-    # TODO: Refactor this
+    # TODO: Refactor this shit
     try:
         return True, requests_handler({'authorization': r['requests']['authorization']}), 200
+    except KeyError:
+        pass
+    try:
+        return True, requests_handler({'change_password': r['requests']['change_password']}), 200
     except KeyError:
         pass
 
