@@ -66,7 +66,7 @@
             "items": {
                 "type": "object",
                 "properties": {
-                    "name": {"type": "string", "minLength": 1, "maxLength": 32},
+                    "name": {"type": "string", "minLength": 1, "maxLength": 64},
                     "deadline": {"type": "string", "maxLength": 32, "format": "date-time"}
                 },
                 "additionalProperties": false,
@@ -83,7 +83,7 @@
                 "type": "object",
                 "properties": {
                     "_id": {"type": "string", "minLength": 1, "maxLength": 32},
-                    "name": {"type": "string", "minLength": 1, "maxLength": 32},
+                    "name": {"type": "string", "minLength": 1, "maxLength": 64},
                     "deadline": {"type": "string", "maxLength": 32, "format": "date-time"}
                 },
                 "additionalProperties": false,
