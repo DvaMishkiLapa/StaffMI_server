@@ -153,7 +153,7 @@ class DBManager:
             if not self.projects.find_one({'_id': ObjectId(project['_id'])}):
                 result.append([False, 'Project not found!', 404])
             else:
-                _id = user.pop('_id')
+                _id = project.pop('_id')
                 self.projects.replace_one({'_id': ObjectId(_id)}, project)
                 result.append((True, 'Project has been changed.', 200))
         return result
