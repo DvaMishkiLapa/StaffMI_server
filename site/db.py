@@ -77,11 +77,11 @@ class DBManager:
     def edit_users(self, users_data):
         result = []
         for user in users_data:
-            if not self.users.find_one({'_id': ObjectId(user['_id'])}):
+            old_user = self.users.find_one({'_id': ObjectId(user['_id'])})
+            if not old_user:
                 result.append([False, 'User not found!', 404])
             else:
-                pwd_hash = sha256(user['pwd'].encode()).hexdigest()
-                user['pwd'] = pwd_hash
+                user['pwd'] = old_user['pwd']
                 _id = user.pop('_id')
                 self.users.replace_one({'_id': ObjectId(_id)}, user)
                 result.append((True, 'User has been changed.', 200))
