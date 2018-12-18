@@ -189,6 +189,7 @@ class DBManager:
     def get_projects_count(self, _=0):
         return True, len(list(self.projects.find({}))) , 200
 
+
     def assign_to_projects(self, data):
         result = []
         for x in data:
