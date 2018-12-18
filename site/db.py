@@ -21,6 +21,7 @@ class DBManager:
         self.users = self.db.users
         self.projects = self.db.projects
         self.connections = self.db.connections
+        self.roles = self.db.roles
 
         self.secret = os.getenv('DB_SECRET', 'MOSTSECUREKEY')
 
@@ -28,8 +29,23 @@ class DBManager:
             'email': os.getenv('ADMIN_EMAIL', 'admin@admin.ru'),
             'pwd': os.getenv('ADMIN_PWD', '12345'),
             'name': ['Иванов', 'Иван', 'Иванович'],
-            'position': 'Генеральный директор'
+            'position': 'Генеральный директор',
+            'role': 'writer'
         }])
+
+        if not self.roles.find_one({}):
+            self.roles.insert_one({'role': 'writer', 'methods': ['*']})
+            self.roles.insert_one({'role': 'reader', 'methods': [
+                'get_all_users',
+                'get_all_projects',
+                'get_users_count',
+                'get_projects_cout'
+            ]})
+
+
+    def get_allowed_methods(self, email):
+        role = self.users.find_one({'email': email})['role']
+        return self.roles.find_one({'role': role})['methods']
 
 
     # Authentication

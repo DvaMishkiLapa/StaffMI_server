@@ -17,10 +17,11 @@
                     "email": {"type": "string", "minLength": 1, "maxLength": 32, "format": "email"},
                     "pwd": {"type": "string", "minLength": 1, "maxLength": 32},
                     "name": {"type": "array", "items": {"type": "string", "minLength": 1, "maxLength": 32}, "maxItems": 3, "minItems": 3},
-                    "position": {"type": "string", "minLength": 1, "maxLength": 32}
+                    "position": {"type": "string", "minLength": 1, "maxLength": 32},
+                    "role": {"type": "string", "minLength": 1, "maxLength": 6}
                 },
                 "additionalProperties": false,
-                "minProperties": 4
+                "minProperties": 5
             }
         },
         "del_users": {

@@ -39,7 +39,16 @@ def response(func):
     return response_wrapper
 
 
-def requests_handler(requests):
+def requests_handler(requests, email=False):
+    if email:
+        result = []
+        methods = dbm.get_allowed_methods(email)
+        for key in requests:
+            if key in methods or '*' in methods:
+                result.append(response_formatter(getattr(dbm, key)(requests[key])))
+            else:
+                result.append(response_formatter((False, 'Permission denied!', 403)))
+        return dict(zip(requests, result))
     result = [response_formatter(getattr(dbm, key)(requests[key])) for key in requests]
     return dict(zip(requests, result))
 
@@ -77,7 +86,7 @@ def main_post():
     if not ok:
         return ok, text, code
 
-    return True, requests_handler(r['requests']), 200
+    return True, requests_handler(r['requests'], text), 200
 
 
 if __name__ == "__main__":
