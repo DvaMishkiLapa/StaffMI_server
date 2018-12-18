@@ -106,6 +106,12 @@ class DBManager:
         users = self.users.find({}, {'pwd': False})
         users = list(users)[offset:offset + length]
         for u in users:
+            u['projects'] = []
+            projects = self.connections.find({'user': u['_id']})
+            for p in projects:
+                project = self.projects.find_one({'_id': p['project']})
+                project['_id'] = str(project['_id'])
+                u['projects'].append(project)
             u['_id'] = str(u['_id'])
         return True, tuple(users), 200
 
@@ -170,6 +176,12 @@ class DBManager:
         projects = self.projects.find({})
         projects = list(projects)[offset:offset + length]
         for p in projects:
+            p['users'] = []
+            users = self.connections.find({'project': p['_id']})
+            for u in users:
+                user = self.users.find_one({'_id': u['user']})
+                user['_id'] = str(user['_id'])
+                p['users'].append(user)
             p['_id'] = str(p['_id'])
         return True, tuple(projects), 200
 
