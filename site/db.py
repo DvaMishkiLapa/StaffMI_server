@@ -20,6 +20,7 @@ class DBManager:
         # Collections
         self.users = self.db.users
         self.projects = self.db.projects
+        self.connections = self.db.connections
 
         self.secret = os.getenv('DB_SECRET', 'MOSTSECUREKEY')
 
@@ -175,3 +176,40 @@ class DBManager:
 
     def get_projects_count(self, _=0):
         return True, len(list(self.projects.find({}))) , 200
+
+    def assign_to_projects(self, data):
+        result = []
+        for x in data:
+            user = self.users.find_one({'email': x['email']})
+            if not user:
+                result.append((False, 'User not found!', 404))
+                continue
+            project = self.projects.find_one({'name': x['project']})
+            if not project:
+                result.append((False, 'Project not found!', 404))
+                continue
+            connection = self.connections.find_one({'user': user['_id'], 'project': project['_id']})
+            if connection:
+                result.append((False, 'Project already assigned!', 400))
+                continue
+            self.connections.insert_one({'user': user['_id'], 'project': project['_id']})
+            result.append((True, 'Project has been assigned!', 200))
+        return result
+
+
+    def remove_from_projects(self, data):
+        result = []
+        for x in data:
+            user = self.users.find_one({'email': x['email']})
+            if not user:
+                result.append((False, 'User not found!', 404))
+                continue
+            project = self.projects.find_one({'name': x['project']})
+            if not project:
+                result.append((False, 'Project not found!', 404))
+                continue
+            if not self.connections.delete_one({'user': user['_id'], 'project': project['_id']}).deleted_count:
+                result.append((False, 'Project not assigned to this user!', 400))
+                continue
+            result.append((True, 'Connection has been removed!', 200))
+        return result
