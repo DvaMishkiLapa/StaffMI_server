@@ -72,6 +72,7 @@ class DBManager:
                 result.append((True, 'User has been removed.', 200))
             else:
                 result.append((False, 'User not found!', 404))
+            self.connections.delete_many({'user': ObjectId(_id)})
         return result
 
 
@@ -155,6 +156,7 @@ class DBManager:
                 result.append((True, 'Project has been removed.', 200))
             else:
                 result.append((False, 'Project not found!', 404))
+            self.connections.delete_many({'project': ObjectId(_id)})
         return result
 
 
